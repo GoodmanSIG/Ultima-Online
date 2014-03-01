@@ -1,0 +1,679 @@
+# Greater heal potion
+sub alch_TMR()
+#alchemy("Total mana refresh", 0x0F87, 0x0F09, 0x0003, ?)
+end sub
+
+# Nightsight
+sub alch_NS()
+alchemy("Nightsight", 0x0F8D, 0x0F06, 0x0000, 0x0963)
+end sub
+
+# Poision Greater
+sub alch_poison_stronger()
+alchemy("Lektvar silneho jedu", 0x0F88, 0x0F0A, 0x0000, 0x0BB5)
+end sub
+
+# Cure potion
+sub alch_cure()
+alchemy("Cure potion", 0x0F84, 0x0F0A, 0x0000, 0x002E)
+end sub
+# Cure potion
+sub alch_cure_greater()
+alchemy("Greater cure potion", 0x0F84, 0x0F07, 0x0000, 0x002E)
+end sub
+
+# Refresh potion
+sub alch_refresh()
+#alchemy("Refresh potion", 0x0F7A, 0x0F0B, 0x0000, ?)
+end sub
+
+# Agility potion
+sub alch_agility()
+#alchemy("Agility potion", 0x0F7B, 0x0F08, 0x0000, ?)
+end sub
+
+# Greater heal potion
+sub alch_heal_greater()
+alchemy("Greater heal potion", 0x0F85, 0x0F0C, 0x0000, 0x0035)
+end sub
+
+# Greater heal potion
+sub alch_strength_greater()
+alchemy("Greater strength potion", 0x0F86, 0x0F09, 0x0000, 0x0481)
+end sub
+
+###################
+# vyroba lektvaru #
+###################
+sub alchemy(potionName, typReagentu, typLektvaru, barvaLektvaru, kegColour)
+var keg	= 0x1940
+
+#UO.print("Where to put complete potions?")
+#UO.addobject("keg")
+#while UO.targeting()
+#	wait(200)
+#wend
+
+var reagentsCount = UO.Count( typReagentu )
+
+while reagentsCount > 0
+UO.deletejournal()
+# dosli lahvicky, prelej to do kegu
+if UO.count( '0x0F0E' ) == 0 then
+if UO.findType( keg, "-1", "ground" ) > 0 then
+UO.print( 'prelevam lektvary do sudu' )
+UO.waitTargetType( typLektvaru, barvaLektvaru )
+UO.useFromGround( keg )
+
+repeat
+wait(100)
+until UO.inJournal("Vkladas empty bottles|Kad je uz naplnena po okraj|Vis co by se stalo,")
+endif
+wait(500)
+endif
+
+# ha, zadnej keg nebo je keg plnej, takho zbal a poloz novej
+if UO.inJournal('Kde mas lahvicky?') then
+UO.print( 'zkousim zbalit keg' )
+UO.waitTargetType( keg, kegColour )
+UO.useFromGround( keg )
+
+# novy keg
+if UO.count( '0x0F0E' ) == 0 then
+UO.useType( '0x14EF' )
+return
+endif
+endif
+
+# no empty flasks
+if UO.inJournal('Kde mas lahvicky?') then
+return
+endif
+
+# pour a potion
+UO.deleteJournal()
+UO.waitmenu("What sort of potion", potionName)
+UO.useType( typReagentu )
+
+repeat
+wait(100)
+#UO.WaitTargetType(typLektvaru,barvaLektvaru)
+until UO.inJournal("You pour the completed potion|Prelevas hotovy|pri pokusu dokoncit lektvar|Nepodarilo se ti dokoncit lektvar|Podarilo se ti umichat")
+wait(500)
+wend
+
+UO.print('Konec alchemie')
+end sub
+
+#tinkering
+sub tinkering()
+If UO.Count('0x1EBC') == 0 then
+UO.Print("***Nemas vercajk, script ukoncen***")
+return
+Endif
+
+Repeat
+While UO.Count("0x1876","0x0000") > 0
+#if UO.Count(item, "0x0000") > count then
+#	UO.Print("dokonceno")
+#	return
+#endif
+UO.DeleteJournal()
+#wire
+UO.Waitmenu('TINKERING','Keys and Containers','Keys and Containers','iron key (1 iron ingot)')
+UO.UseType('0x1EBC')
+
+While NOT UO.inJournal("You put|You have failed|You can't|Vkladas|nepovedlo")
+Wait(300)
+Wend
+wend
+UO.Print("Neni z ceho vyrabet")
+return
+Until UO.Dead()
+end sub
+
+###
+sub bs_crafting()
+var item = "0x0F51"
+var count = 25 - 1
+
+If UO.Count("0x13E3") < 1 then	## a tinktools
+UO.Print("Nemas vercajk")
+Return
+Endif
+
+#UO.print("Klikni na bednu z ingotama")
+#UO.exec("addobject bedna")
+#	while UO.targeting()
+#	wait(100)
+#	wend
+
+
+While UO.Count("0x1BEF","0x0000") > 0
+if UO.Count(item, "0x0000") > count then
+UO.Print("dokonceno")
+return
+endif
+UO.DeleteJournal()
+#dagger
+UO.waitmenu('Blacksmithing','Weapons','Weapons','Swords & Blades','Swords & Blades','dagger (3 iron ingots)')
+UO.WaitTargetType("0x1BEF","0x0000")
+UO.Usetype("0x13E3")
+
+While NOT UO.inJournal("You put|You have failed|You can't|Vkladas|Nepovedlo se")
+Wait(300)
+Wend
+wend
+UO.Print("Neni z ceho vyrabet")
+end sub
+
+sub sipy_sipky()
+var vyrobek = "Crossbow Bolt +2 (1 shaft, 1 f";
+#var vyrobek = "Arrow +2 (1 shaft, 1 feather)";
+var dyka = "0x0F52"
+
+UO.print("Oznac bednu s logy a perim")
+UO.addobject("bedna")
+while UO.targeting()
+wait(200)
+wend
+
+UO.findtype(dyka, "-1", "backpack")
+if not UO.count(dyka) > 0 then
+UO.print("Nemas dyku")
+return
+endif
+
+while not UO.dead()
+UO.deletejournal()
+# dosli shafty?
+if UO.count("0x1BD4") < 1 then
+UO.findtype("0x1BDD", "-1", "bedna")
+# vem preddefinovany pocet logu logu
+if UO.findcount() > 0 then
+UO.moveitem("finditem", "1", "backpack")
+wait(500)
+# a udelej z nich shafty, at vyroba lita
+UO.waittargettype("0x1BDD")
+UO.usetype(dyka)
+UO.waitmenu('What do you want to carve the wood into?','shaft (1 log)')
+while not UO.inJournal("Vkladas|Nepovedlo")
+wait(200)
+wend
+else
+UO.print("Dosly logy")
+return
+endif
+endif
+wait(500)
+
+# peri
+if UO.count("0x1BD1") < 1 then
+UO.findtype("0x1BD1", "-1", "bedna")
+if UO.findcount() > 0 then
+UO.moveitem("finditem", "1", "backpack")
+wait(500)
+else
+UO.print("Doslo peri")
+return
+endif
+endif	
+
+wait(500)
+UO.usetype("0x1BD1")
+UO.WaitMenu("Select arrow type", vyrobek)
+while not UO.inJournal("Vkladas|Nepovedlo")
+wait(200)
+wend
+wend
+end sub
+
+# carpentry - vyroba kegu na lektvary
+sub carp_kegy()
+var kladivo	= 0x13E3;
+var hoblik	= 0x1030;
+var ingot	= 0x1BEF;
+var board	= 0x1BD7;
+var hides = 0x1078;
+var deed = 0x14EF;
+
+var amount	= 0;
+var waitMovePause = 500;
+
+var boardsCnt = 0;
+var barrelHoops = 0;
+var barrelStaves= 0;
+var barrelLids	= 0;
+var ingotsCnt	= 0;
+var hidesCnt	= 0;
+
+UO.findType( kladivo, "1", "backpack" )
+UO.findType( hoblik, "1", "backpack" )
+if UO.count(hoblik) == 0 || UO.count(kladivo) == 0 then
+UO.print("Nemas cim vyrabet")
+exec("terminate carp_kegy")
+endif
+
+# Choose container with material
+UO.print("Where is your material?")
+UO.AddObject("source")
+while UO.targeting()
+wait(200)
+wend
+
+# Choose where to put complete deeds
+UO.print("Where do you want to put deeds in?")
+UO.addobject("target")
+while UO.targeting()
+wait(200)
+wend
+
+while not UO.dead()
+UO.deletejournal()
+# Craft Barrel Hoops
+if UO.count( "0x10E1" ) == 0 then
+# take needed material
+ingotsCnt = UO.count( ingot );
+if ingotsCnt < 2 then
+UO.findType( ingot, "-1", "source" )
+UO.moveItem( "finditem", 2 - ingotsCnt, "backpack")
+wait( waitMovePause )
+endif
+# there is no material, terminate
+#if UO.count( ingot ) < 1 then
+#	UO.print( "You are out of Iron Ingots, terminating")
+#	UO.exec( "terminate carp_kegy")
+#else
+UO.print( 'making barrel hoops' )
+UO.waitmenu('Blacksmithing','Misc','Misc','barrel hoops 2 iron ingots')
+UO.Usetype( ingot )
+repeat
+wait(100)
+until UO.inJournal('Nepovedlo|nepovedlo|Vkladas barrel hoops|No item found')
+wait( waitMovePause )
+#endif
+endif
+
+# Craft Barrel Staves
+if UO.count( "0x1EB1" ) == 0 then
+# take needed material
+boardsCnt = UO.count( board );
+if boardsCnt < 5 then
+UO.findType( board, "-1", "source" )
+UO.moveItem( "finditem", 5 - boardsCnt, "backpack")
+wait( waitMovePause )
+endif
+# there is no material, terminate
+#if UO.count( board ) < 5 then
+#	UO.print( "You are out of boards, terminating")
+#	UO.exec( "terminate carp_kegy")
+#else
+UO.print( 'making barrel staves' )
+UO.waitmenu('Kegs & Barrels', 'barrel staves (5 boards)')
+UO.Usetype( hoblik )
+repeat
+wait(100)
+until UO.inJournal('Nepovedlo|nepovedlo|Vkladas barrel staves')
+wait( waitMovePause )
+#endif
+endif
+
+# Craft Barrel Lid
+if UO.count( "0x1DB8" ) == 0 then
+# take needed material
+boardsCnt = UO.count( board );
+if boardsCnt < 2 then
+UO.findType( board, "-1", "source" )
+UO.moveItem( "finditem", 2 - boardsCnt, "backpack")
+wait( waitMovePause )
+endif
+# there is no material, terminate
+if UO.count( board ) < 2 then
+UO.print( "You are out of boards, terminating")
+UO.exec( "terminate carp_kegy")
+else
+UO.print( 'making barrel lid' )
+UO.waitmenu('Kegs & Barrels', 'barrel lid (2 boards)')
+UO.Usetype( hoblik )
+repeat
+wait(100)
+until UO.inJournal('Nepovedlo|nepovedlo|Vkladas barrel lid')
+wait( waitMovePause )
+endif
+endif
+
+# piles of hides
+hidesCnt = UO.count( hides );
+if hidesCnt < 3 then
+# take needed amount of piles of hide
+UO.findType( hides, "-1", "source" )
+UO.moveItem( "finditem", 3 - hidesCnt, "backpack")
+wait( waitMovePause )
+# there is no material, terminate
+if UO.count( hides ) < 3 then
+UO.print( "You have no piles of hides, terminating script")
+UO.exec( "terminate carp_kegy")
+endif
+endif
+
+# if we have all we need, craft us some deed :)
+barrelHoops = UO.count( "0x10E1" )
+barrelStaves = UO.count( "0x1EB1" )
+barrelLids	= UO.count( "0x1DB8" )
+#UO.print( str(barrelHoops) + ' ' + str(barrelStaves) + ' ' + str(barrelLids) + ' ' + str(UO.count( hides )) )
+if barrelHoops && barrelStaves && barrelLids && UO.count( hides ) then
+UO.print( 'MAKING DEED' )
+uo.waitmenu("Kegs & Barrels", "Listina na sudy lektvaru")
+UO.Usetype( hoblik )
+repeat
+wait(100)
+until UO.inJournal('Nepovedlo|nepovedlo|Vkladas Listina na sudy lektvaru do sveho batohu|Vzdavas presvedcovani')
+endif
+
+UO.findType( deed, "-1", "backpack" )
+UO.moveItem( "finditem", "-1", "target")
+wait( waitMovePause )
+wend
+
+UO.print( "Nemas uz vse potrebne" )
+end sub
+
+
+
+
+
+
+
+
+
+
+    Explore
+    Features
+    Enterprise
+    Blog
+
+    0
+    0
+
+public hakimCZE / kelevar-yoko-scripts
+
+kelevar-yoko-scripts / training.sc
+Pavel Hasala hakimCZE 2 months ago
+Merge remote-tracking branch 'refs/remotes/origin/master'
+
+1 contributor
+file 257 lines (221 sloc) 5.799 kb
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 	
+
+sub AnimalTaming()
+Uo.Print("Oznac Zvire Ktere Budes Tamovat")
+UO.Addobject("zvire")
+while uo.targeting()
+wait(300)
+wend
+
+While not uo.dead()
+Uo.WaitTargetobject("zvire")
+UO.UseSkill('Animal Taming')
+UO.DeleteJournal()
+Repeat
+wait(500)
+Until UO.InJournal("nepodarilo|ochocen")
+
+If Uo.InJournal("ochocen") then
+Uo.msg("all Release")
+wait(500)
+Endif
+wend
+end sub
+
+#######
+sub armslore()
+UO.print("Zamer idem k identifikaci")
+
+uo.exec("addobject item")
+while uo.targeting()
+wait(100)
+wend
+while not uo.dead()
+UO.Useskill("Arms Lore" , "item")
+Uo.Deletejournal()
+repeat
+wait(200)
+#until uo.injournal(vysledek) or uo.injournal(vysledek2)
+until uo.injournal("This item|Nedokazes")
+wend
+end sub
+
+sub bs_train()
+var item = 0x1B73
+var ingot = 0x1BEF
+var ingotColor = 0x0810
+var count = 3 - 1
+var potreba_ingotu = 10
+var pocet_ingotu = UO.STR*3.85 - UO.Weight
+var truhla = 0x42B1F4BC
+var ruda = "Shadow"
+var material = "shadow"
+
+dim menu[5]
+menu[0] = "Blacksmithing"
+menu[1] = "Colored Armor"
+menu[2] = (ruda + " Armor & Shields")
+menu[3] = (ruda + " Shields")
+menu[4] = (ruda + " Shields")
+menu[5] = (ruda + " Buckler (10 " + material + " ingot)")
+
+
+AddObject("nastroj", "Oznac nastroj");
+AddObject("bedna_ingoty", "Oznac bednu s ingotama")
+
+While NOT UO.dead()
+UO.FindType(ingot, ingotColor, "bedna_ingoty")
+UO.MoveItem("finditem", 100, "backpack")
+Wait(1000)
+
+While UO.Count(ingot, ingotColor) >= potreba_ingotu
+UO.DeleteJournal()
+
+UO.WaitMenu(menu[0], menu[1], menu[2], menu[3], menu[4], menu[5])
+UO.WaitTargetType(ingot, ingotColor)
+UO.UseObject("nastroj")
+
+While NOT UO.InJournal("You put|You have failed|You can't|Vkladas|Nepovedlo se")
+Wait(100)
+Wend
+
+#While UO.Count(item) > 0
+# Uo.FindType(item,"-1","backpack")
+# Uo.Moveitem("finditem","0","bedna_na_vyrobek")
+# wait(1000)
+#wend
+wend
+wend
+UO.Print("Neni z ceho vyrabet")
+end sub
+
+Sub bs_coif(typ_ingot, barva_ingot, typ_coif, ruda, material)
+####################################
+# Autor: Elrond z Noblesu #
+# Shard: Kelevar #
+# Popis: Bere ingy z truhly, ukove #
+# coif, coify haze do #
+# vybraneho kontejneru. #
+####################################
+
+;UZIVATELSKE NASTAVENI:
+var pauza_presun = 1000
+var pocet_ingu = 100
+
+;SYSTEMOVE PROMENNE:
+dim menu[5]
+menu[0] = "Blacksmithing"
+menu[1] = "Colored Armor"
+menu[2] = (ruda + " Armor & Shields")
+menu[3] = (ruda + " ChainMail")
+menu[4] = (ruda + " ChainMail Armor")
+menu[5] = (ruda + " Chainmail Coif (10 " + material + " ingot)")
+
+AddObject("nastroj", "Oznac nastroj")
+AddObject("bedna_ingoty", "Oznac bednu s ingotama")
+AddObject("bedna_coify", "Oznac bednu, kam chces hazet coify")
+
+While NOT UO.Dead()
+If UO.Count(typ_ingot, barva_ingot) < 10 Then
+#While UO.Count(typ_coif) > 0
+# UO.FindType(typ_coif, -1, "backpack")
+# UO.MoveItem("finditem", -1, "bedna_coify")
+# Wait(pauza_presun)
+#Wend
+UO.FindType(typ_ingot, barva_ingot, "bedna_ingoty")
+UO.MoveItem("finditem", pocet_ingu, "backpack")
+Wait(pauza_presun)
+Endif
+
+UO.DeleteJournal()
+
+UO.WaitMenu(menu[0], menu[1], menu[2], menu[3], menu[4], menu[5])
+UO.WaitTargetType(typ_ingot, barva_ingot)
+UO.UseObject("nastroj")
+
+While NOT UO.InJournal("Vkladas|Nepovedlo se|You have failed|You can´t")
+Wait(100)
+Wend
+
+While UO.Count(typ_coif) > 0
+UO.FindType(typ_coif, -1, "backpack")
+UO.MoveItem("finditem", -1, "bedna_coify")
+Wait(pauza_presun)
+wend
+Wend
+end Sub
+
+sub copper_coif()
+bs_coif(0x1BE3, 0x0000, 0x13BB, "Copper", "copper")
+end sub
+
+Sub AddObject(name, desc)
+UO.Print(desc)
+UO.Set("quiet", 1)
+UO.AddObject(name)
+UO.Set("quiet", 0)
+While UO.Targeting()
+Wait(100)
+Wend
+;thx 2 Carda
+End Sub
+
+#####
+
+sub shafty()
+uo.print("Oznac bednu s logy")
+uo.addobject("bedna")
+while uo.targeting()
+wait(200)
+wend
+
+var dyka = "0x0F51"
+uo.findtype(dyka, "-1", "backpack")
+if not uo.count(dyka) > 0 then
+uo.print("Nemas dyku (mozna je spatne id ve skriptu - zkus 0x0F51 nebo 0x0F52!)")
+return
+endif
+
+while not uo.dead()
+uo.deletejournal()
+uo.findtype("0x1BDD", "-1", "bedna")
+if uo.findcount() > 0 then
+uo.moveitem("finditem", "1", "backpack")
+else
+uo.print("Dosly logy")
+return
+endif
+wait(1100)
+
+uo.waittargettype("0x1BDD")
+uo.usetype(dyka)
+uo.waitmenu('What do you want to carve the wood into?','shaft (1 log)')
+while not uo.injournal("Vkladas|Nepovedlo")
+wait(200)
+wend
+wend
+end sub
+
+sub cooking()
+while uo.count("0x09F1","0x0000") > 0
+UO.Set("quiet","1")
+UO.Set("finddistance","2")
+
+if uo.CountGround("0x0DE3") < 1 then
+uo.waittargettype("0x0DE1")
+uo.drop("1","1,0,1")
+wait(2000)
+while uo.CountGround("0x0DE3") < 1
+uo.usefromground("0x0DE1")
+wait(2000)
+wend
+endif
+
+uo.deletejournal()
+uo.usefromground("0x0DE3")
+repeat
+wait(100)
+until uo.injournal("Nepovedlo|nepovedlo|Vkladas")
+
+UO.Set("quiet","0")
+wend
+uo.print("Dosli steaky konec vareni")
+end sub
+
+# meditation
+sub meditation()
+While NOT UO.Dead()
+UO.UseSkill('Meditation')
+wait(2000)
+wend
+end sub
+
+sub herding()
+UO.exec('addobject zvire')
+while UO.Targeting()
+wait(500)
+wend
+opet:
+UO.DeleteJournal()
+UO.UseType(0x0e81)
+UO.WaitTargetObject('zvire','self')
+repeat
+wait(500)
+until uo.InJournal("You don't seem to be able|The animal goes where it is instructed|Vypada to")
+goto opet
+end sub
+
+#
+sub evalint()
+while not uo.dead()
+uo.deletejournal()
+UO.WaitTargetObject ("self")
+UO.useskill ('Evaluating Intelligence')
+repeat
+wait (100)
+until uo.injournal('si myslis|jsi dosel k nazoru|Zda se ti|Nepodarilo se ti')
+wait(500)
+wend
+end sub
+
+    Status
+    API
+    Training
+    Shop
+    Blog
+    About
+
+    © 2014 GitHub, Inc.
+    Terms
+    Privacy
+    Security
+    Contact
+
+
